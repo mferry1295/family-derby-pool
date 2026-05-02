@@ -938,7 +938,10 @@
           if (!pick) return;
           const v = parseInt(input.value, 10);
           pick.amount = isFinite(v) && v > 0 ? v : 0;
-          renderSlip();
+          // Update projections + button state in-place so the input keeps
+          // focus — re-rendering innerHTML would dismiss the mobile keyboard
+          // after every keystroke.
+          updateSlipProjections();
         });
       });
       list.querySelectorAll("[data-remove-pick]").forEach(btn => {
@@ -946,6 +949,32 @@
           const post = parseInt(btn.dataset.removePick, 10);
           toggleSlipPick(post);
         });
+      });
+    }
+
+    if (placeBtn) {
+      const ready = slipPicks.length > 0 && slipPicks.every(p => p.amount > 0);
+      placeBtn.disabled = !ready;
+    }
+  }
+
+  // Update only the projected-win text and place-bets button state, leaving
+  // the stake <input> elements untouched so they keep focus while typing.
+  function updateSlipProjections() {
+    const list = document.getElementById("slip-items");
+    const placeBtn = document.getElementById("place-bets");
+
+    if (list) {
+      list.querySelectorAll(".slip-item").forEach(li => {
+        const post = parseInt(li.dataset.post, 10);
+        const pick = findPick(post);
+        if (!pick) return;
+        const win = projectedWin(post, pick.amount, slipPicks);
+        const winLine = (pick.amount > 0 && win != null)
+          ? `If 1st: <strong>${fmtUSD(win)}</strong> <span class="muted">(net ${fmtUSD(win - pick.amount)})</span>`
+          : `Set a stake to see projected win`;
+        const projEl = li.querySelector(".slip-item-projection");
+        if (projEl) projEl.innerHTML = winLine;
       });
     }
 
