@@ -315,7 +315,6 @@
     const ordered = horses.slice().sort((a, b) => a.num - b.num);
 
     const cards = ordered.map(h => {
-      const tag = h.tag ? `<span class="horse-tag">${escapeHtml(h.tag)}</span>` : "";
       const j = parseExtra(h.jockeyExtra);
       const t = parseExtra(h.trainerExtra);
       const jFlag = j.flag ? `<span class="flag" aria-hidden="true">${j.flag}</span> ` : "";
@@ -324,7 +323,7 @@
       <article class="horse-card" data-post="${h.post}">
         <span class="horse-post">${h.post}</span>
         <span class="horse-silks" style="--silks-a:${h.silksA};--silks-b:${h.silksB}"></span>
-        <h3 class="horse-name">${h.name}${tag}</h3>
+        <h3 class="horse-name">${h.name}</h3>
         <div class="odds-col odds-ml" title="Morning-line odds">
           <span class="odds-value">${h.odds}</span>
           <span class="odds-label">M/L</span>
