@@ -290,15 +290,29 @@
   // For the owner field: split on " — " (name | note), then find the first
   // country name we recognize anywhere in the name half for a flag.
   const COUNTRIES_BY_LEN = Object.keys(COUNTRY_TO_CODE).sort((a, b) => b.length - a.length);
+  const COUNTRY_PATTERN = COUNTRIES_BY_LEN
+    .map(c => c.replace(/[.*+?^${}()|[\]\\\/]/g, "\\$&"))
+    .join("|");
+
+  // Strip "(Country)" and ", Country)" mentions — the flag already shows it.
+  function stripCountries(text) {
+    if (!text) return text;
+    let s = text;
+    s = s.replace(new RegExp(`,\\s*(?:${COUNTRY_PATTERN})\\)`, "g"), ")");
+    s = s.replace(new RegExp(`\\s*\\((?:${COUNTRY_PATTERN})\\)`, "g"), "");
+    return s.replace(/\s{2,}/g, " ").trim();
+  }
+
   function parseOwner(owner) {
     if (!owner) return { flag: "", name: "—", note: "" };
     const dashMatch = owner.match(/^(.+?)\s+—\s+(.+)$/);
-    const name = dashMatch ? dashMatch[1].trim() : owner.trim();
+    let name = dashMatch ? dashMatch[1].trim() : owner.trim();
     const note = dashMatch ? dashMatch[2].trim() : "";
     let flag = "";
     for (const c of COUNTRIES_BY_LEN) {
       if (name.includes(c)) { flag = flagEmoji(COUNTRY_TO_CODE[c]); break; }
     }
+    name = stripCountries(name);
     return { flag, name, note };
   }
 
@@ -356,7 +370,7 @@
             <p>${escapeHtml(h.concerns)}</p>
           </div>` : ""}
           ${h.funFact ? `
-          <p class="hd-funfact"><span class="hd-label">Fun fact</span> ${escapeHtml(h.funFact)}</p>` : ""}
+          <p class="hd-funfact">${escapeHtml(h.funFact)}</p>` : ""}
         </div>`;
         })()}
       </article>
