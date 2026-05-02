@@ -1,5 +1,5 @@
 /* ==========================================================================
-   The Family Derby Pool — styles
+   Derby Pool — styles
    Brand tokens from the Kentucky Derby Style Guide v1.0
    ========================================================================== */
 
@@ -188,21 +188,11 @@ p { margin: 0 0 1rem; }
   display: inline-flex;
 }
 .brand-text {
-  display: inline-flex;
-  flex-direction: column;
-  line-height: 1.05;
-}
-.brand-line-1 {
-  font-family: var(--sans);
-  font-size: 0.65rem;
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
-  color: var(--champagne);
-}
-.brand-line-2 {
   font-family: var(--serif);
-  font-size: 1.05rem;
+  font-size: 1.15rem;
   font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.05;
 }
 
 .primary-nav {

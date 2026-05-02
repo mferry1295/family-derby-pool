@@ -1,4 +1,4 @@
-/* The Family Derby Pool — interactivity
+/* Derby Pool — interactivity
    - Renders the field
    - Bet calculator + form submission (Supabase-backed shared pool)
    - Live realtime sync of everyone's bets
@@ -674,7 +674,7 @@
   // -------------------------------------------------------------------------
   function buildMultiSlipText(bettor, picks) {
     const lines = [
-      "— Family Derby Pool · Bet Slip —",
+      "— Derby Pool · Bet Slip —",
       "",
       "Bettor: " + (bettor || "(your name)"),
       "",
