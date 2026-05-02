@@ -1,7 +1,7 @@
 /* The Family Derby Pool — interactivity
    - Renders the field
-   - Bet calculator + form submission (mailto + clipboard fallback)
-   - localStorage ledger of the bettor's own slips
+   - Bet calculator + form submission (Supabase-backed shared pool)
+   - Live realtime sync of everyone's bets
    - Countdown to post time
 */
 (function () {
@@ -10,9 +10,9 @@
   // -------------------------------------------------------------------------
   // Config
   // -------------------------------------------------------------------------
-  const HOST_EMAIL = "mferry1295@gmail.com";
   const POST_TIME_ISO = "2026-05-02T18:57:00-04:00"; // 6:57 PM ET, Sat May 2, 2026
-  const STORAGE_KEY = "familyDerbyPool.bets.v1";
+  const SUPABASE_URL = "https://sswohrmidrbuxluevosm.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_fLgnMThw72XF61S6zsofmw_rBqfZdt9";
 
   // Assumed-pool figure used to project payouts before any real money is in.
   // Tuned so the worked-example math matches real intuition.
@@ -321,11 +321,10 @@
   // -------------------------------------------------------------------------
   function renderField() {
     const grid = document.getElementById("horse-grid");
-    const select = document.getElementById("horse-select");
-    if (!grid || !select) return;
+    if (!grid) return;
 
     // Display order: shortest morning-line odds first (favorite on top).
-    // Stable sort preserves post-position order on ties (e.g., the two 7/1s).
+    // Stable sort preserves post-position order on ties.
     const ordered = horses.slice().sort((a, b) => a.num - b.num);
 
     const cards = ordered.map(h => {
@@ -333,11 +332,23 @@
       const t = parseExtra(h.trainerExtra);
       const jFlag = j.flag ? `<span class="flag" aria-hidden="true">${j.flag}</span> ` : "";
       const tFlag = t.flag ? `<span class="flag" aria-hidden="true">${t.flag}</span> ` : "";
+      const o = parseOwner(h.owner);
+      const oFlag = o.flag ? `<span class="flag" aria-hidden="true">${o.flag}</span> ` : "";
+      const personRow = (label, flag, name, note) => `
+        <div class="hd-row">
+          <div class="hd-line"><span class="hd-label">${label}</span> ${flag}${escapeHtml(name)}</div>
+          ${note ? `<div class="hd-note">${escapeHtml(note)}</div>` : ""}
+        </div>`;
       return `
       <article class="horse-card" data-post="${h.post}">
-        <span class="horse-post">${h.post}</span>
-        <span class="horse-silks" style="--silks-a:${h.silksA};--silks-b:${h.silksB}"></span>
-        <h3 class="horse-name">${h.name}</h3>
+        <div class="horse-name-col">
+          <h3 class="horse-name">${escapeHtml(h.name)}</h3>
+          <div class="horse-meta-row">
+            <span class="horse-post-pill">#${h.post}</span>
+            <span class="horse-silks" style="--silks-a:${h.silksA};--silks-b:${h.silksB}" aria-hidden="true"></span>
+            <button type="button" class="bio-toggle" data-bio-toggle aria-expanded="false">Bio</button>
+          </div>
+        </div>
         <div class="odds-col odds-ml" title="Morning-line odds">
           <span class="odds-value">${h.odds}</span>
           <span class="odds-label">M/L</span>
@@ -346,15 +357,7 @@
           <span class="odds-value live-value">—</span>
           <span class="odds-label">Live</span>
         </div>
-        ${(() => {
-          const o = parseOwner(h.owner);
-          const oFlag = o.flag ? `<span class="flag" aria-hidden="true">${o.flag}</span> ` : "";
-          const personRow = (label, flag, name, note) => `
-            <div class="hd-row">
-              <div class="hd-line"><span class="hd-label">${label}</span> ${flag}${escapeHtml(name)}</div>
-              ${note ? `<div class="hd-note">${escapeHtml(note)}</div>` : ""}
-            </div>`;
-          return `
+        <button type="button" class="add-to-slip" data-add-slip aria-label="Add ${escapeHtml(h.name)} to slip">Add to slip</button>
         <div class="horse-details" aria-hidden="true">
           ${personRow("Jockey",  jFlag, h.jockey  || "—", j.note)}
           ${personRow("Trainer", tFlag, h.trainer || "—", t.note)}
@@ -371,59 +374,31 @@
           </div>` : ""}
           ${h.funFact ? `
           <p class="hd-funfact">${escapeHtml(h.funFact)}</p>` : ""}
-        </div>`;
-        })()}
+        </div>
       </article>
     `;
     }).join("");
     grid.innerHTML = cards;
 
-    const opts = ordered.map(h =>
-      `<option value="${h.post}">#${h.post} · ${h.name} (${h.odds})</option>`
-    ).join("");
-    // Keep the placeholder option, append horses after it
-    select.insertAdjacentHTML("beforeend", opts);
-
-    // Tap-to-pick: clicking any card preselects that horse in the form.
     grid.querySelectorAll(".horse-card").forEach(card => {
       const post = parseInt(card.dataset.post, 10);
-      card.setAttribute("role", "button");
-      card.setAttribute("tabindex", "0");
-      card.setAttribute("aria-label", "Pick post " + post + " for your bet");
-      card.addEventListener("click", () => pickHorse(post));
-      card.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          pickHorse(post);
-        }
-      });
+      const bioBtn = card.querySelector("[data-bio-toggle]");
+      if (bioBtn) {
+        bioBtn.addEventListener("click", () => {
+          const open = card.classList.toggle("is-bio-open");
+          bioBtn.setAttribute("aria-expanded", String(open));
+          const det = card.querySelector(".horse-details");
+          if (det) det.setAttribute("aria-hidden", String(!open));
+        });
+      }
+      const addBtn = card.querySelector("[data-add-slip]");
+      if (addBtn) {
+        addBtn.addEventListener("click", () => toggleSlipPick(post));
+      }
     });
-  }
 
-  // Select a horse in the form, scroll back up, focus the next blank field.
-  function pickHorse(post) {
-    const sel = document.getElementById("horse-select");
-    if (!sel) return;
-    sel.value = String(post);
-    sel.dispatchEvent(new Event("change"));
-
-    const horse = horseByPost.get(post);
-    if (horse) toast(horse.name + " selected — fill in your stake.");
-
-    const formSec = document.getElementById("bet");
-    if (formSec) formSec.scrollIntoView({ behavior: "smooth", block: "start" });
-
-    // After the scroll settles, focus the first empty field.
-    const bettor = document.getElementById("bettor");
-    const amount = document.getElementById("amount");
-    setTimeout(() => {
-      const target = (bettor && !bettor.value.trim())
-        ? bettor
-        : (amount && !amount.value ? amount : null);
-      if (target) target.focus({ preventScroll: true });
-    }, 400);
-
-    // Highlight is now handled by updateBio() via the change event.
+    // Reflect any slip state that already exists (e.g., when reopening the page)
+    refreshAddButtons();
   }
 
   // -------------------------------------------------------------------------
@@ -498,96 +473,68 @@
     };
   }
 
-  // Highlight the chosen card so the bio details expand under it.
-  function updateBio(horse) {
-    document.querySelectorAll(".horse-card.is-picked").forEach(c => {
-      c.classList.remove("is-picked");
-      const d = c.querySelector(".horse-details");
-      if (d) d.setAttribute("aria-hidden", "true");
-    });
-    if (!horse) return;
-    const card = document.querySelector('.horse-card[data-post="' + horse.post + '"]');
-    if (!card) return;
-    card.classList.add("is-picked");
-    const d = card.querySelector(".horse-details");
-    if (d) d.setAttribute("aria-hidden", "false");
+  // -------------------------------------------------------------------------
+  // Bets — synced across everyone via Supabase, kept in an in-memory cache
+  // so the rest of the code can keep reading them synchronously.
+  // -------------------------------------------------------------------------
+  let supabase = null;
+  let betsCache = [];
+
+  function initSupabase() {
+    if (supabase || !window.supabase) return;
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   }
 
-  function updatePreview() {
-    const post = parseInt(document.getElementById("horse-select").value, 10);
-    const amount = parseInt(document.getElementById("amount").value, 10);
-    const preview = document.getElementById("bet-preview");
-    if (!preview) return;
+  function rowToBet(row) {
+    return {
+      id: row.id,
+      bettor: row.bettor,
+      post: row.post,
+      amount: row.amount,
+      at: new Date(row.created_at).getTime()
+    };
+  }
 
-    const horse = horseByPost.get(post);
-    updateBio(horse);
+  function addBetToCache(row) {
+    const bet = rowToBet(row);
+    if (betsCache.some(b => b.id === bet.id)) return false;
+    betsCache.push(bet);
+    return true;
+  }
 
-    if (!horse || !amount || amount <= 0) {
-      preview.innerHTML = `<p class="preview-headline">${horse ? "Add a stake to see your projected payout." : "Pick a horse and stake to see your projected payout."}</p>`;
+  async function fetchAllBets() {
+    if (!supabase) return;
+    const { data, error } = await supabase
+      .from("bets")
+      .select("*")
+      .order("created_at", { ascending: true });
+    if (error) {
+      console.error("Failed to fetch bets:", error);
       return;
     }
-
-    // Use the actual pool when there's any money in it; otherwise project
-    // against an assumed pool so the preview still makes sense from $0.
-    const bets = loadBets();
-    const currentPool = bets.reduce((s, b) => s + b.amount, 0);
-    const onHorseBefore = bets
-      .filter(b => b.post === post)
-      .reduce((s, b) => s + b.amount, 0);
-
-    let win, place, show, headline;
-
-    if (currentPool > 0) {
-      const newPool = currentPool + amount;
-      const newOnHorse = onHorseBefore + amount;
-      const myShare = amount / newOnHorse;
-      win   = myShare * newPool * 0.6;
-      place = myShare * newPool * 0.3;
-      show  = myShare * newPool * 0.1;
-      headline = `If <em>${horse.name}</em> finishes — <span class="muted small">live ${fmtUSD(newPool)} pool</span>`;
-    } else {
-      const pool = Math.max(ASSUMED_POOL, amount * 4);
-      const r = projectShare(horse.num, amount, pool);
-      win = r.win; place = r.place; show = r.show;
-      headline = `If <em>${horse.name}</em> finishes — <span class="muted small">projected against a ${fmtUSD(pool)} pool</span>`;
-    }
-
-    preview.innerHTML = `
-      <p class="preview-headline">${headline}</p>
-      <div class="preview-grid">
-        <div class="preview-cell win">
-          <span class="pc-label">1st (60%)</span>
-          <span class="pc-value">${fmtUSD(win)}</span>
-          <span class="pc-detail">net ${fmtUSD(win - amount)}</span>
-        </div>
-        <div class="preview-cell place">
-          <span class="pc-label">2nd (30%)</span>
-          <span class="pc-value">${fmtUSD(place)}</span>
-          <span class="pc-detail">net ${fmtUSD(place - amount)}</span>
-        </div>
-        <div class="preview-cell show">
-          <span class="pc-label">3rd (10%)</span>
-          <span class="pc-value">${fmtUSD(show)}</span>
-          <span class="pc-detail">net ${fmtUSD(show - amount)}</span>
-        </div>
-      </div>
-    `;
+    betsCache = data.map(rowToBet);
   }
 
-  // -------------------------------------------------------------------------
-  // Ledger (localStorage)
-  // -------------------------------------------------------------------------
+  function subscribeToBets() {
+    if (!supabase) return;
+    supabase
+      .channel("bets-changes")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "bets" },
+        payload => {
+          if (addBetToCache(payload.new)) {
+            renderLedgerAndStats();
+            updateLiveOdds();
+            renderSlip();
+          }
+        }
+      )
+      .subscribe();
+  }
+
   function loadBets() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : [];
-    } catch (e) {
-      return [];
-    }
-  }
-  function saveBets(bets) {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(bets)); }
-    catch (e) { /* private mode etc — silently no-op */ }
+    return betsCache.slice();
   }
 
   function renderLedgerAndStats() {
@@ -608,24 +555,23 @@
     setStat("bettors", bettors.toString());
     setStat("favorite", topPost ? `#${topPost}` : "—");
 
+    renderBoard(bets, pot, topPost);
+
     // Ledger
     const list = document.getElementById("ledger");
     const empty = document.getElementById("ledger-empty");
-    const clearBtn = document.getElementById("clear-ledger");
-    if (!list || !empty || !clearBtn) return;
+    if (!list || !empty) return;
 
     if (bets.length === 0) {
       list.hidden = true;
       list.innerHTML = "";
       empty.hidden = false;
-      clearBtn.hidden = true;
       updateLiveOdds();
       return;
     }
 
     empty.hidden = true;
     list.hidden = false;
-    clearBtn.hidden = false;
 
     list.innerHTML = bets.slice().reverse().map(b => {
       const horse = horseByPost.get(b.post);
@@ -640,6 +586,72 @@
     }).join("");
 
     updateLiveOdds();
+  }
+
+  // -------------------------------------------------------------------------
+  // Live Betting Board — bar chart of where money is sitting per horse.
+  // -------------------------------------------------------------------------
+  function renderBoard(bets, pot, topPost) {
+    const list = document.getElementById("board-bars");
+    const empty = document.getElementById("board-empty");
+    if (!list || !empty) return;
+
+    if (!bets || bets.length === 0 || pot <= 0) {
+      list.innerHTML = "";
+      list.hidden = true;
+      empty.hidden = false;
+      return;
+    }
+
+    empty.hidden = true;
+    list.hidden = false;
+
+    // Aggregate per horse: total stake + per-bettor stake
+    const byPost = new Map();
+    bets.forEach(b => {
+      if (!byPost.has(b.post)) byPost.set(b.post, { post: b.post, total: 0, bettors: new Map() });
+      const e = byPost.get(b.post);
+      e.total += b.amount;
+      e.bettors.set(b.bettor, (e.bettors.get(b.bettor) || 0) + b.amount);
+    });
+    const rows = Array.from(byPost.values()).sort((a, b) => b.total - a.total);
+    const maxAmt = rows[0].total || 1;
+
+    list.innerHTML = rows.map(r => {
+      const horse = horseByPost.get(r.post);
+      if (!horse) return "";
+      const pct = (r.total / pot) * 100;
+      const fillWidth = (r.total / maxAmt) * 100;
+      const liveOddsLabel = formatLiveOdds(pot / r.total - 1);
+      const isFav = r.post === topPost;
+      const bettorChips = Array.from(r.bettors.entries())
+        .sort((a, b) => b[1] - a[1])
+        .map(([name, amt]) => `<span class="bettor-chip">${escapeHtml(name)} · ${fmtUSD(amt)}</span>`)
+        .join("");
+      const bettorCount = r.bettors.size;
+      const peopleLabel = bettorCount === 1 ? "Who has placed bets (1)" : `Who has placed bets (${bettorCount})`;
+      return `
+        <li class="board-bar${isFav ? " is-favored" : ""}">
+          <div class="board-bar-row1">
+            <span class="post">#${horse.post}</span>
+            <span class="silks" style="--silks-a:${horse.silksA};--silks-b:${horse.silksB}" aria-hidden="true"></span>
+            <span class="name">${escapeHtml(horse.name)}</span>
+            <span class="total">${fmtUSD(r.total)}</span>
+            <span class="live-odds">${liveOddsLabel}</span>
+          </div>
+          <div class="board-bar-track" aria-hidden="true">
+            <div class="board-bar-fill" style="width:${fillWidth}%"></div>
+          </div>
+          <div class="board-bar-meta">
+            <span class="board-bar-pct">${pct.toFixed(0)}% of the pot</span>
+            <details class="board-bar-people">
+              <summary>${peopleLabel}</summary>
+              <div class="board-bar-bettors">${bettorChips}</div>
+            </details>
+          </div>
+        </li>
+      `;
+    }).join("");
   }
 
   function setStat(key, value) {
@@ -657,67 +669,92 @@
   }
 
   // -------------------------------------------------------------------------
-  // Form submission — composes a bet slip and opens mailto:
+  // Form submission — writes the bet to Supabase; realtime fans it out to
+  // every other open browser.
   // -------------------------------------------------------------------------
-  function buildSlipText(bet, horse) {
-    return [
+  function buildMultiSlipText(bettor, picks) {
+    const lines = [
       "— Family Derby Pool · Bet Slip —",
       "",
-      "Bettor: " + bet.bettor,
-      "Horse: #" + bet.post + " " + horse.name + " (" + horse.odds + ")",
-      "Stake: " + fmtUSD(bet.amount),
-      "Submitted: " + new Date(bet.at).toLocaleString(),
+      "Bettor: " + (bettor || "(your name)"),
       "",
-      "Reply to confirm and settle up. Good luck."
-    ].join("\n");
+    ];
+    picks.forEach(p => {
+      const h = horseByPost.get(p.post);
+      if (!h) return;
+      lines.push("Horse: #" + p.post + " " + h.name + " (" + h.odds + ")");
+      lines.push("Stake: " + fmtUSD(p.amount));
+      lines.push("");
+    });
+    const total = picks.reduce((s, p) => s + (p.amount || 0), 0);
+    lines.push("Total stake: " + fmtUSD(total));
+    lines.push("");
+    lines.push("Good luck.");
+    return lines.join("\n");
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    const bettor = document.getElementById("bettor").value.trim();
-    const post = parseInt(document.getElementById("horse-select").value, 10);
-    const amount = parseInt(document.getElementById("amount").value, 10);
+    const bettorEl = document.getElementById("bettor");
+    const bettor = bettorEl ? bettorEl.value.trim() : "";
 
-    if (!bettor) return toast("Add your name first.", true);
-    if (!horseByPost.has(post)) return toast("Pick a horse.", true);
-    if (!amount || amount <= 0) return toast("Set a stake of at least $1.", true);
+    if (slipPicks.length === 0) return toast("Add at least one horse to your slip.", true);
+    if (!slipPicks.every(p => p.amount > 0)) {
+      setSlipExpanded(true);
+      return toast("Set a stake on every pick.", true);
+    }
+    if (!bettor) {
+      setSlipExpanded(true);
+      if (bettorEl) bettorEl.focus();
+      return toast("Add your name first.", true);
+    }
+    if (!supabase) return toast("Can't reach the pool — check your connection and try again.", true);
 
-    const horse = horseByPost.get(post);
-    const bet = { bettor, post, amount, at: Date.now() };
+    const placeBtn = document.getElementById("place-bets");
+    const originalLabel = placeBtn ? placeBtn.textContent : "";
+    if (placeBtn) { placeBtn.disabled = true; placeBtn.textContent = "Saving…"; }
 
-    const bets = loadBets();
-    bets.push(bet);
-    saveBets(bets);
-    renderLedgerAndStats();  // refreshes pool.html stats + ledger if present
-    updateLiveOdds();        // refreshes field.html live odds if present
-    updatePreview();         // re-projects the preview against the new pool
+    const rows = slipPicks.map(p => ({ bettor, post: p.post, amount: p.amount }));
+    const { data, error } = await supabase
+      .from("bets")
+      .insert(rows)
+      .select();
 
-    const slip = buildSlipText(bet, horse);
-    const subject = "Derby Pool: " + bettor + " on #" + post + " " + horse.name;
-    const mailto =
-      "mailto:" + encodeURIComponent(HOST_EMAIL) +
-      "?subject=" + encodeURIComponent(subject) +
-      "&body=" + encodeURIComponent(slip);
+    if (placeBtn) { placeBtn.textContent = originalLabel; }
 
-    window.location.href = mailto;
-    toast("Bet saved. Email opened — send it to lock in your slip.");
+    if (error) {
+      console.error("Insert failed:", error);
+      if (placeBtn) placeBtn.disabled = false;
+      return toast("Couldn't save your bets — try again.", true);
+    }
+
+    let added = 0;
+    (data || []).forEach(row => { if (addBetToCache(row)) added++; });
+    if (added > 0) {
+      renderLedgerAndStats();
+      updateLiveOdds();
+    }
+
+    const count = rows.length;
+    slipPicks = [];
+    refreshAddButtons();
+    renderSlip();
+
+    toast(count === 1 ? "Bet locked in." : `${count} bets locked in.`);
   }
 
   function handleCopySlip() {
-    const bettor = document.getElementById("bettor").value.trim() || "(your name)";
-    const post = parseInt(document.getElementById("horse-select").value, 10);
-    const amount = parseInt(document.getElementById("amount").value, 10);
-    const horse = horseByPost.get(post);
-    if (!horse || !amount) return toast("Fill in the form first.", true);
+    const bettor = document.getElementById("bettor").value.trim();
+    if (slipPicks.length === 0) return toast("Add a horse to your slip first.", true);
 
-    const slip = buildSlipText({ bettor, post, amount, at: Date.now() }, horse);
+    const text = buildMultiSlipText(bettor, slipPicks);
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(slip).then(
+      navigator.clipboard.writeText(text).then(
         () => toast("Bet slip copied to clipboard."),
-        () => fallbackCopy(slip)
+        () => fallbackCopy(text)
       );
     } else {
-      fallbackCopy(slip);
+      fallbackCopy(text);
     }
   }
 
@@ -731,15 +768,6 @@
     try { document.execCommand("copy"); toast("Bet slip copied."); }
     catch (e) { toast("Couldn't copy — select and copy manually.", true); }
     finally { document.body.removeChild(ta); }
-  }
-
-  function handleClear() {
-    if (!confirm("Clear all your saved bet slips on this device? (This won't affect anything the host has on file.)")) return;
-    saveBets([]);
-    renderLedgerAndStats();
-    updateLiveOdds();
-    updatePreview();
-    toast("Slips cleared.");
   }
 
   // -------------------------------------------------------------------------
@@ -780,6 +808,199 @@
   }
 
   // -------------------------------------------------------------------------
+  // Bet slip (sticky bottom, multi-pick cart)
+  //   - "Add to slip" on a horse card pushes a pick into slipPicks
+  //   - Each pick gets its own stake input
+  //   - Place Bets submits all picks at once via Supabase batch insert
+  // -------------------------------------------------------------------------
+  const DEFAULT_STAKE = 20;
+  let slipPicks = []; // [{ post, amount }]
+
+  function findPick(post) {
+    return slipPicks.find(p => p.post === post);
+  }
+
+  function setSlipExpanded(open) {
+    const slip = document.getElementById("bet-slip");
+    const toggle = document.getElementById("slip-toggle");
+    if (!slip || !toggle) return;
+    slip.dataset.expanded = String(open);
+    toggle.setAttribute("aria-expanded", String(open));
+  }
+
+  function setupBetSlip() {
+    const slip = document.getElementById("bet-slip");
+    const toggle = document.getElementById("slip-toggle");
+    if (slip && toggle) {
+      toggle.addEventListener("click", () => {
+        setSlipExpanded(slip.dataset.expanded !== "true");
+      });
+    }
+  }
+
+  // Project a single pick's win share. When `othersInSlip` is provided, each
+  // of those stakes is also assumed to be added to the pool — that gives a
+  // more realistic projection when the slip has multiple picks.
+  function projectedWin(post, amount, othersInSlip = []) {
+    const horse = horseByPost.get(post);
+    if (!horse || !amount || amount <= 0) return null;
+    const bets = loadBets();
+    const slipExtra = othersInSlip
+      .filter(p => p.post !== post && p.amount > 0)
+      .reduce((s, p) => s + p.amount, 0);
+    const currentPool = bets.reduce((s, b) => s + b.amount, 0) + slipExtra;
+    const onHorseBefore = bets
+      .filter(b => b.post === post)
+      .reduce((s, b) => s + b.amount, 0);
+    if (currentPool > 0) {
+      const newPool = currentPool + amount;
+      const newOnHorse = onHorseBefore + amount;
+      return (amount / newOnHorse) * newPool * 0.6;
+    }
+    const pool = Math.max(ASSUMED_POOL, amount * 4);
+    return projectShare(horse.num, amount, pool).win;
+  }
+
+  function toggleSlipPick(post) {
+    const horse = horseByPost.get(post);
+    if (!horse) return;
+    const idx = slipPicks.findIndex(p => p.post === post);
+    if (idx >= 0) {
+      slipPicks.splice(idx, 1);
+      toast(`${horse.name} removed from slip.`);
+    } else {
+      slipPicks.push({ post, amount: DEFAULT_STAKE });
+      toast(`${horse.name} added to slip.`);
+    }
+    refreshAddButtons();
+    renderSlip();
+  }
+
+  function refreshAddButtons() {
+    document.querySelectorAll(".horse-card").forEach(card => {
+      const post = parseInt(card.dataset.post, 10);
+      const inSlip = !!findPick(post);
+      card.classList.toggle("is-in-slip", inSlip);
+      const btn = card.querySelector("[data-add-slip]");
+      if (btn) {
+        btn.dataset.inSlip = String(inSlip);
+        btn.textContent = inSlip ? "✓ Added" : "Add to slip";
+      }
+    });
+  }
+
+  function renderSlip() {
+    const slip = document.getElementById("bet-slip");
+    if (!slip) return;
+
+    const pill = document.getElementById("slip-pill");
+    const line1 = document.getElementById("slip-line1");
+    const list = document.getElementById("slip-items");
+    const placeBtn = document.getElementById("place-bets");
+
+    if (slipPicks.length === 0) {
+      slip.dataset.state = "empty";
+      if (pill) pill.textContent = "+";
+      if (line1) line1.textContent = "Bet Slip";
+      if (list) list.innerHTML = "";
+      if (placeBtn) placeBtn.disabled = true;
+      const empty = document.getElementById("slip-empty");
+      if (empty) empty.hidden = false;
+      return;
+    }
+
+    slip.dataset.state = "filled";
+
+    if (pill) pill.textContent = String(slipPicks.length);
+    if (line1) {
+      line1.textContent = slipPicks.length === 1 ? "1 pick" : `${slipPicks.length} picks`;
+    }
+
+    const empty = document.getElementById("slip-empty");
+    if (empty) empty.hidden = true;
+
+    if (list) {
+      list.innerHTML = slipPicks.map(p => {
+        const h = horseByPost.get(p.post);
+        const win = projectedWin(p.post, p.amount, slipPicks);
+        const winLine = (p.amount > 0 && win != null)
+          ? `If 1st: <strong>${fmtUSD(win)}</strong> <span class="muted">(net ${fmtUSD(win - p.amount)})</span>`
+          : `Set a stake to see projected win`;
+        return `
+          <li class="slip-item" data-post="${p.post}">
+            <span class="slip-item-silks" style="--silks-a:${h.silksA};--silks-b:${h.silksB}" aria-hidden="true"></span>
+            <div class="slip-item-meta">
+              <span class="slip-item-name">#${h.post} ${escapeHtml(h.name)} <span class="muted small">${h.odds}</span></span>
+              <span class="slip-item-projection muted small">${winLine}</span>
+            </div>
+            <span class="money-input slip-item-stake">
+              <span class="money-mark">$</span>
+              <input type="number" inputmode="numeric" min="1" step="1" value="${p.amount > 0 ? p.amount : ''}" placeholder="0" data-stake-input data-post="${p.post}" aria-label="Stake for ${escapeHtml(h.name)}" />
+            </span>
+            <button type="button" class="slip-item-remove" data-remove-pick="${p.post}" aria-label="Remove ${escapeHtml(h.name)} from slip">×</button>
+          </li>
+        `;
+      }).join("");
+
+      list.querySelectorAll("[data-stake-input]").forEach(input => {
+        input.addEventListener("input", () => {
+          const post = parseInt(input.dataset.post, 10);
+          const pick = findPick(post);
+          if (!pick) return;
+          const v = parseInt(input.value, 10);
+          pick.amount = isFinite(v) && v > 0 ? v : 0;
+          renderSlip();
+        });
+      });
+      list.querySelectorAll("[data-remove-pick]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const post = parseInt(btn.dataset.removePick, 10);
+          toggleSlipPick(post);
+        });
+      });
+    }
+
+    if (placeBtn) {
+      const ready = slipPicks.length > 0 && slipPicks.every(p => p.amount > 0);
+      placeBtn.disabled = !ready;
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Mobile nav — hamburger toggles the dropdown; tapping outside closes it.
+  // -------------------------------------------------------------------------
+  function setupNavToggle() {
+    const btn = document.getElementById("nav-toggle");
+    const nav = document.getElementById("primary-nav");
+    if (!btn || !nav) return;
+
+    function setOpen(open) {
+      nav.classList.toggle("is-open", open);
+      btn.setAttribute("aria-expanded", String(open));
+    }
+
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      setOpen(!nav.classList.contains("is-open"));
+    });
+
+    // Close when tapping outside the nav
+    document.addEventListener("click", (e) => {
+      if (!nav.classList.contains("is-open")) return;
+      if (nav.contains(e.target) || btn.contains(e.target)) return;
+      setOpen(false);
+    });
+
+    // Close when escape is pressed
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && nav.classList.contains("is-open")) {
+        setOpen(false);
+        btn.focus();
+      }
+    });
+  }
+
+  // -------------------------------------------------------------------------
   // Boot — each page picks up only the wiring it needs
   // -------------------------------------------------------------------------
   function on(id, evt, fn) {
@@ -787,17 +1008,26 @@
     if (el) el.addEventListener(evt, fn);
   }
 
-  document.addEventListener("DOMContentLoaded", function () {
+  document.addEventListener("DOMContentLoaded", async function () {
+    setupNavToggle();        // mobile hamburger menu
+    setupBetSlip();          // sticky bottom slip toggle (no-op if not on field)
     renderField();           // no-ops if no #horse-grid (e.g. pool/index)
-    updateLiveOdds();        // no-ops if no .horse-card on the page
-    renderLedgerAndStats();  // no-ops if no #ledger (e.g. index/field)
+    renderSlip();            // initial empty slip state
     tickCountdown();         // no-ops if no [data-unit]
     setInterval(tickCountdown, 1000);
 
-    on("horse-select", "change", updatePreview);
-    on("amount", "input", updatePreview);
     on("bet-form", "submit", handleSubmit);
     on("copy-slip", "click", handleCopySlip);
-    on("clear-ledger", "click", handleClear);
+
+    // Cloud-sync the bets only on pages that actually display them
+    const page = document.body.dataset.page;
+    if (page === "field" || page === "pool") {
+      initSupabase();
+      await fetchAllBets();
+      renderLedgerAndStats();
+      updateLiveOdds();
+      renderSlip();
+      subscribeToBets();
+    }
   });
 })();

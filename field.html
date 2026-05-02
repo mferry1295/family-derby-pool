@@ -25,63 +25,55 @@
           <span class="brand-line-2">Derby Pool</span>
         </span>
       </a>
-      <nav class="primary-nav">
+      <nav class="primary-nav" id="primary-nav">
         <a href="index.html">How It Works</a>
         <a href="field.html" aria-current="page">Place a Bet</a>
-        <a href="pool.html">The Pool</a>
+        <a href="pool.html">Live Betting Board</a>
       </nav>
+      <button class="nav-toggle" id="nav-toggle" type="button" aria-label="Toggle menu" aria-expanded="false" aria-controls="primary-nav">
+        <span class="nav-toggle-bars" aria-hidden="true"><span></span><span></span><span></span></span>
+      </button>
     </div>
   </header>
 
   <main id="top">
     <p class="event-strip">152<sup>nd</sup> Run for the Roses · Saturday, May 2, 2026 · Churchill Downs</p>
 
-    <div class="bet-layout">
-      <aside class="bet-pane" id="bet">
-        <h1 class="pane-title">Place a Bet <span class="pane-sub">— tap a horse to pick</span></h1>
-        <div class="bet-shell">
-          <form class="bet-form" id="bet-form" novalidate>
-            <div class="form-row">
-              <label>
-                <span class="label">Your name</span>
-                <input type="text" name="bettor" id="bettor" placeholder="e.g., Aunt Linda" required autocomplete="name" />
-              </label>
-            </div>
-
-            <div class="form-row two">
-              <label>
-                <span class="label">Horse</span>
-                <select name="horse" id="horse-select" required>
-                  <option value="" disabled selected>Choose a horse —</option>
-                </select>
-              </label>
-              <label>
-                <span class="label">Stake</span>
-                <span class="money-input">
-                  <span class="money-mark">$</span>
-                  <input type="number" name="amount" id="amount" min="1" step="1" placeholder="20" required />
-                </span>
-              </label>
-            </div>
-
-            <div class="bet-preview" id="bet-preview" aria-live="polite">
-              <p class="preview-headline">Pick a horse and stake to see your projected payout.</p>
-            </div>
-
-            <div class="bet-actions">
-              <button type="submit" class="btn btn-primary">Send My Bet</button>
-              <button type="button" class="btn btn-ghost" id="copy-slip">Copy Slip</button>
-            </div>
-            <p class="muted small">No money moves through this site. Settle up with the host directly.</p>
-          </form>
-        </div>
-      </aside>
-
-      <section class="field-pane" id="field">
-        <div class="horse-grid" id="horse-grid"><!-- horses injected by script.js --></div>
-      </section>
-    </div>
+    <section class="field-section" id="field">
+      <header class="field-section-head">
+        <h1>Place a Bet</h1>
+        <p class="muted small">Tap “Add to slip” to build your bet, then open the slip at the bottom to set stakes and place your bets.</p>
+      </header>
+      <div class="horse-grid" id="horse-grid"><!-- horses injected by script.js --></div>
+    </section>
   </main>
+
+  <aside class="bet-slip" id="bet-slip" data-state="empty" data-expanded="false" aria-label="Your bet slip">
+    <div class="slip-bar">
+      <button class="slip-bar-toggle" id="slip-toggle" type="button" aria-expanded="false" aria-controls="slip-body">
+        <span class="slip-pill" id="slip-pill" aria-hidden="true">+</span>
+        <span class="slip-bar-line1" id="slip-line1">Bet Slip</span>
+      </button>
+      <button class="slip-bar-cta" id="place-bets" type="submit" form="bet-form" disabled>Place Bets</button>
+    </div>
+
+    <div class="slip-body" id="slip-body">
+      <form class="slip-form bet-form" id="bet-form" novalidate>
+        <p class="slip-empty" id="slip-empty">No picks yet — tap “Add to slip” on any horse.</p>
+        <ul class="slip-items" id="slip-items"></ul>
+
+        <label class="slip-field">
+          <span class="label">Your name</span>
+          <input type="text" name="bettor" id="bettor" placeholder="e.g., Aunt Linda" required autocomplete="name" />
+        </label>
+
+        <div class="bet-actions">
+          <button type="button" class="btn btn-ghost" id="copy-slip">Copy Slip</button>
+        </div>
+        <p class="muted small">No money moves through this site. Settle up with the host directly.</p>
+      </form>
+    </div>
+  </aside>
 
   <footer class="site-footer">
     <div class="footer-inner">
@@ -95,6 +87,7 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="script.js"></script>
 </body>
 </html>
