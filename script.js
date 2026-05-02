@@ -23,7 +23,7 @@
   // Post-position colors follow the official Kentucky Derby saddle towels.
   // -------------------------------------------------------------------------
   const horses = [
-    { post:1, name:"Renegade", odds:"4-1", num:4,
+    { post:1, name:"Renegade", odds:"5-1", num:5,
       jockey:"Irad Ortiz Jr.",
       jockeyExtra:" (Puerto Rico) — one of the most accomplished riders in North America, but 0-for-9 in past Derbies",
       trainer:"Todd Pletcher",
@@ -34,7 +34,7 @@
       concerns:"He drew the rail — gate 1 — which is the worst spot in the race. No horse has won from there since 1986. Also, favorites have lost the Derby every year since 2018.",
       funFact:"He was bought as a yearling for $975,000 and is a half-brother (same mom) to fellow Derby starter Commandment." },
 
-    { post:2, name:"Albus", odds:"30-1", num:30,
+    { post:2, name:"Albus", odds:"50-1", num:50,
       jockey:"Manny Franco",
       jockeyExtra:" (Puerto Rico) — top East Coast rider with two prior Derby starts but no win",
       trainer:"Riley Mott",
@@ -45,7 +45,7 @@
       concerns:"His dad (Yaupon) is a young stallion better known for producing sprinters, and Albus's running style and speed numbers are a notch below the top contenders.",
       funFact:"Riley Mott has two horses in this race against his Hall of Fame father — a real-life family rivalry on the biggest stage in the sport." },
 
-    { post:3, name:"Intrepido", odds:"50-1", num:50,
+    { post:3, name:"Intrepido", odds:"55-1", num:55,
       jockey:"Hector Berrios",
       jockeyExtra:" (Venezuela) — South Florida–based rider making his Kentucky Derby debut",
       trainer:"Jeff Mullins",
@@ -56,7 +56,7 @@
       concerns:"He's never beaten this caliber of horses. He squeaked into the field on points and most handicappers are tossing him.",
       funFact:"He's one of four horses in the race that trace back to Into Mischief — that single stallion has now sired or grandsired four of the last six Derby winners." },
 
-    { post:4, name:"Litmus Test", odds:"30-1", num:30,
+    { post:4, name:"Litmus Test", odds:"34-1", num:34,
       jockey:"Martin Garcia",
       jockeyExtra:" (Mexico) — longtime Bob Baffert rider, won the 2010 Preakness with Lookin At Lucky",
       trainer:"Bob Baffert",
@@ -67,7 +67,7 @@
       concerns:"He hasn't been the same horse this year — he ran a troubled seventh in the Arkansas Derby last out. His dad (Nyquist, the 2016 Derby winner) tends to produce horses better at shorter distances.",
       funFact:"He sold for $875,000 as a yearling, and Baffert's team is adding blinkers (eye covers that help horses focus straight ahead) for the first time today." },
 
-    { post:5, name:"Great White", odds:"50-1", num:50,
+    { post:21, name:"Great White", odds:"29-1", num:29,
       jockey:"Alex Achard",
       jockeyExtra:" (France) — French-born apprentice rider based in the US, making his Kentucky Derby debut",
       trainer:"John Ennis",
@@ -78,7 +78,7 @@
       concerns:"His Battaglia win came on a synthetic track, and when he tried real dirt in the Blue Grass Stakes he ran a flat fifth. Switching surfaces for the biggest race of his life is a real worry.",
       funFact:"His dad (Volatile) was a brilliant sprinter — which means his bloodlines aren't bred for the Derby trip the way most of the other contenders are." },
 
-    { post:6, name:"Commandment", odds:"6-1", num:6,
+    { post:6, name:"Commandment", odds:"7-1", num:7,
       jockey:"Luis Saez",
       jockeyExtra:" (Panama) — top-tier rider whose best Derby finish was third with Essential Quality in 2021",
       trainer:"Brad Cox",
@@ -89,7 +89,7 @@
       concerns:"His speed numbers are middle-of-the-pack — at least eight other horses in the race have gone equally fast or faster. And Cox's last 10 Derby starters have averaged a 10th-place finish.",
       funFact:"He's a half-brother to favorite Renegade and to Mandaloun. His mother's father, Orb, won the 2013 Derby — so his bloodlines come pre-stamped for Churchill Downs." },
 
-    { post:7, name:"Danon Bourbon", odds:"20-1", num:20,
+    { post:7, name:"Danon Bourbon", odds:"14-1", num:14,
       jockey:"Atsuya Nishimura",
       jockeyExtra:" (Japan) — this is his first race ever on American soil",
       trainer:"Manabu Ikezoe",
@@ -100,7 +100,7 @@
       concerns:"No Japanese-based horse has ever won the Kentucky Derby, despite seven previous tries. Shipping a horse across the Pacific and getting him to peak on a strange track is a massive ask.",
       funFact:"This is one of two Japan-trained horses in the race, plus a third (Six Speed) shipping in from Dubai — making for an unusually international field." },
 
-    { post:8, name:"So Happy", odds:"15-1", num:15,
+    { post:8, name:"So Happy", odds:"6-1", num:6,
       jockey:"Mike Smith",
       jockeyExtra:" (USA) — at 60 years old, the oldest rider in the race; won the 2018 Derby with Justify and the 2005 Derby with Giacomo",
       trainer:"Mark Glatt",
@@ -111,18 +111,7 @@
       concerns:"His dad (Runhappy) was a champion sprinter whose offspring are usually best at much shorter distances. Pedigree experts say the 1¼ miles will likely be too far for him.",
       funFact:"A win would make Mike Smith, at 60, the oldest jockey ever to win the Derby, breaking Bill Shoemaker's record (54)." },
 
-    { post:9, name:"The Puma", odds:"10-1", num:10,
-      jockey:"Javier Castellano",
-      jockeyExtra:" (Venezuela) — won the 2023 Derby with longshot Mage; this is his 18th Derby ride",
-      trainer:"Gustavo Delgado",
-      trainerExtra:" (Venezuela) — won the 2023 Derby with Mage; based in South Florida",
-      owner:"OGMA Investments (USA), JR Ranch (USA), and High Step Racing (USA) — a Florida-based partnership of three smaller racing groups",
-      silksA:"#0d9488", silksB:"#FAF6F0", sex:"Colt",
-      likes:"He won the Tampa Bay Derby and only lost the Florida Derby by a nose to Commandment. The Castellano-Delgado team has already won this race together.",
-      concerns:"Closely tied to Commandment in his prep races and never quite beat him. His mother's side of the family doesn't scream “long-distance horse.”",
-      funFact:"His dad (Essential Quality) was the favorite for the 2021 Derby and lost — so The Puma is essentially trying to redeem his father's biggest career disappointment." },
-
-    { post:10, name:"Wonder Dean", odds:"30-1", num:30,
+    { post:10, name:"Wonder Dean", odds:"20-1", num:20,
       jockey:"Ryusei Sakai",
       jockeyExtra:" (Japan) — one of Japan's top riders; finished third in the 2024 Derby with Forever Young and has won the Saudi Cup twice",
       trainer:"Daisuke Takayanagi",
@@ -133,7 +122,7 @@
       concerns:"Two devastating historical trends apply here — since 2000, 21 horses have used the UAE Derby as a Kentucky Derby prep and zero have won the Run for the Roses. He's also Japan-bred, another 0-for category.",
       funFact:"Sakai's third-place finish with Forever Young in 2024 was actually called for the win at one point, then bumped to third after a steward's review." },
 
-    { post:11, name:"Incredibolt", odds:"20-1", num:20,
+    { post:11, name:"Incredibolt", odds:"27-1", num:27,
       jockey:"Jaime Torres",
       jockeyExtra:" (Puerto Rico) — won the 2024 Preakness Stakes with Seize the Grey; this is his Derby debut",
       trainer:"Riley Mott",
@@ -144,7 +133,7 @@
       concerns:"His form against top horses is uneven, and stepping up to face the Derby field is a much taller order.",
       funFact:"Riley Mott's two Pin Oak horses (Incredibolt and Albus) are both essentially auditioning for the family stable while his father Bill Mott's horse runs against them — a fascinating father-son dynamic." },
 
-    { post:12, name:"Chief Wallabee", odds:"8-1", num:8,
+    { post:12, name:"Chief Wallabee", odds:"9-1", num:9,
       jockey:"Junior Alvarado",
       jockeyExtra:" (Venezuela) — won last year's Derby with Sovereignty, his first ever",
       trainer:"Bill Mott",
@@ -155,7 +144,7 @@
       concerns:"He hasn't actually won a major race yet — he's been runner-up multiple times to Commandment specifically.",
       funFact:"Alvarado was fined $62,000 for whipping his horse too many times during last year's Derby win — appealed and got it reduced to $31,000." },
 
-    { post:13, name:"Ocelli", odds:"50-1", num:50,
+    { post:22, name:"Ocelli", odds:"50-1", num:50,
       jockey:"Joe Ramos",
       jockeyExtra:" (USA) — Kentucky circuit rider making his Kentucky Derby debut",
       trainer:"D. Whitworth Beckman",
@@ -166,7 +155,7 @@
       concerns:"He's never won a major stakes race, and the Derby is a giant leap.",
       funFact:"His ownership group is one of the smaller, more grassroots partnerships in this race — a David-and-Goliath story against the mega-stables." },
 
-    { post:14, name:"Potente", odds:"20-1", num:20,
+    { post:14, name:"Potente", odds:"23-1", num:23,
       jockey:"Juan Hernandez",
       jockeyExtra:" (Mexico) — California-based rider, won the 2023 Breeders' Cup Classic on White Abarrio",
       trainer:"Bob Baffert",
@@ -177,7 +166,7 @@
       concerns:"He's never won a top-tier race. Not all pedigree experts are convinced 1¼ miles is his sweet spot.",
       funFact:"Either Potente or his stablemate Litmus Test could give Baffert an unprecedented seventh Derby win, breaking a tie with the legendary Ben Jones." },
 
-    { post:15, name:"Emerging Market", odds:"15-1", num:15,
+    { post:15, name:"Emerging Market", odds:"11-1", num:11,
       jockey:"Flavien Prat",
       jockeyExtra:" (France) — won the 2019 Derby with Country House (via disqualification of Maximum Security)",
       trainer:"Chad Brown",
@@ -188,7 +177,7 @@
       concerns:"Two career races is extremely light for a Derby horse. Surviving a 20-horse traffic scramble with that little experience is a real concern.",
       funFact:"His dad (Candy Ride) was 23 years old when Emerging Market was conceived — practically a senior citizen by stallion standards." },
 
-    { post:16, name:"Pavlovian", odds:"30-1", num:30,
+    { post:16, name:"Pavlovian", odds:"52-1", num:52,
       jockey:"Edwin Maldonado",
       jockeyExtra:" (Mexico) — Southern California–based rider making his Kentucky Derby debut",
       trainer:"Doug O'Neill",
@@ -199,7 +188,7 @@
       concerns:"His speed numbers are still well below the top contenders, and he's drawn next to a horse (Six Speed) who could push him into a faster early pace than ideal. He's also had some history of breaking slowly from the gate.",
       funFact:"As recently as Valentine's Day, Pavlovian had won just one race in eight tries. The transformation in three months has been one of the wildest stories of this Derby trail." },
 
-    { post:17, name:"Six Speed", odds:"50-1", num:50,
+    { post:17, name:"Six Speed", odds:"40-1", num:40,
       jockey:"Brian Hernandez Jr.",
       jockeyExtra:" (USA) — won the 2024 Derby with Mystik Dan",
       trainer:"Bhupat Seemar",
@@ -210,7 +199,7 @@
       concerns:"He's been racing in Dubai, and shippers from there have a poor track record at the Derby. His mother was a sprinter, and aggressive front-running tactics in a 20-horse field often get caught late.",
       funFact:"This is the first horse from trainer Bhupat Seemar's Dubai stable to start in the Kentucky Derby — a milestone for Middle Eastern racing." },
 
-    { post:18, name:"Further Ado", odds:"6-1", num:6,
+    { post:18, name:"Further Ado", odds:"7-1", num:7,
       jockey:"John Velazquez",
       jockeyExtra:" (Puerto Rico) — the winningest active Derby jockey with three wins (Animal Kingdom 2011, Always Dreaming 2017, Authentic 2020)",
       trainer:"Brad Cox",
@@ -221,7 +210,7 @@
       concerns:"No Blue Grass Stakes winner has actually gone on to win the Derby since 1991 — a 35-year drought.",
       funFact:"His breeder (Debby Oxley) also bred 2024 Derby third-place finisher Sierra Leone, suggesting her breeding program is on a serious heater." },
 
-    { post:19, name:"Golden Tempo", odds:"30-1", num:30,
+    { post:19, name:"Golden Tempo", odds:"36-1", num:36,
       jockey:"Jose Ortiz",
       jockeyExtra:" (Puerto Rico) — younger brother of favorite Renegade's jockey Irad Ortiz Jr.; won the 2017 Belmont Stakes with Tapwrit",
       trainer:"Cherie DeVaux",
@@ -232,7 +221,7 @@
       concerns:"No son of Curlin has ever won the Kentucky Derby, despite Curlin himself being one of the best racehorses of the past 25 years. He also only finished third in the Louisiana Derby.",
       funFact:"It's a true sibling rivalry — the Ortiz brothers are the most successful jockey siblings in racing history, and they're going head-to-head for the Derby trophy today." },
 
-    { post:20, name:"Robusta", odds:"50-1", num:50,
+    { post:23, name:"Robusta", odds:"50-1", num:50,
       jockey:"Emisael Jaramillo",
       jockeyExtra:" (Venezuela) — Florida-based veteran rider best known for South Florida circuit success, making his Kentucky Derby debut",
       trainer:"Doug O'Neill",
