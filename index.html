@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Family Derby Pool · 152nd Run for the Roses</title>
+  <meta name="description" content="The Family &amp; Friends Kentucky Derby pool. Pari-mutuel betting with a 60/30/10 split across win, place, and show." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Source+Sans+3:wght@400;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body data-page="how">
+  <header class="site-nav">
+    <div class="nav-inner">
+      <a href="index.html" class="brand" aria-label="Family Derby Pool home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 2 L13 9 L20 10 L13 12 L12 22 L11 12 L4 10 L11 9 Z" fill="currentColor"/></svg>
+        </span>
+        <span class="brand-text">
+          <span class="brand-line-1">The Family</span>
+          <span class="brand-line-2">Derby Pool</span>
+        </span>
+      </a>
+      <nav class="primary-nav">
+        <a href="index.html" aria-current="page">How It Works</a>
+        <a href="field.html">Place a Bet</a>
+        <a href="pool.html">The Pool</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="hero-inner">
+        <div class="hero-text">
+          <p class="eyebrow">152<sup>nd</sup> Run for the Roses</p>
+          <h1 class="hero-title">Run <span class="hero-amp">for the</span> Roses</h1>
+          <p class="hero-sub">Saturday, May 2, 2026 · Churchill Downs · Post 6:57 PM ET</p>
+        </div>
+        <aside class="hero-aside">
+          <a href="field.html" class="btn btn-primary btn-hero-cta">Place a Bet</a>
+          <p class="muted small hero-cta-sub">Twenty-two horses. Live odds.</p>
+        </aside>
+      </div>
+    </section>
+
+    <section id="how-it-works" class="section how-it-works">
+      <div class="section-head">
+        <p class="kicker">01 — The Rules</p>
+        <h2>How the Pool Works</h2>
+        <p class="lede">Pari-mutuel betting — exactly how the real track does it. No house, no bookie, no fixed odds. The pot is split among the winners, weighted by what each person bet.</p>
+      </div>
+
+      <div class="explainer-grid">
+        <article class="explainer-card">
+          <span class="step-num">1</span>
+          <h3>Everyone Chips In</h3>
+          <p>Family and friends pick a horse and bet whatever they want. Every dollar goes into one pot. No house cut.</p>
+        </article>
+        <article class="explainer-card">
+          <span class="step-num">2</span>
+          <h3>The Pool Sets the Odds</h3>
+          <p>Heavy favorites pay small — the pool is split among many backers. Longshots pay huge because few people backed them. Real, honest odds emerge from the pool itself.</p>
+        </article>
+        <article class="explainer-card">
+          <span class="step-num">3</span>
+          <h3>60 / 30 / 10</h3>
+          <p>Backers of 1st split <strong>60%</strong> of the pot. Backers of 2nd split <strong>30%</strong>. Backers of 3rd split <strong>10%</strong>. More people win something.</p>
+        </article>
+      </div>
+
+      <div class="split-viz" aria-hidden="true">
+        <div class="split-bar">
+          <div class="split-seg seg-win">  <span>60%</span><em>1st</em></div>
+          <div class="split-seg seg-place"><span>30%</span><em>2nd</em></div>
+          <div class="split-seg seg-show"> <span>10%</span><em>3rd</em></div>
+        </div>
+      </div>
+
+      <div class="worked-example">
+        <h3>A Worked Example</h3>
+        <div class="example-grid">
+          <div class="example-text">
+            <p>Say the family pool reaches <strong>$400</strong>. You bet <strong>$20</strong> on <em>Renegade</em>. Other backers put in <strong>$80</strong>, so the total bet on him is <strong>$100</strong>.</p>
+            <p class="muted">Now the race runs. Three things can happen.</p>
+          </div>
+          <div class="example-cards">
+            <div class="result-card win">
+              <h4>If he wins</h4>
+              <p class="result-amount">$48</p>
+              <p class="result-detail">You take 20% of the $240 win pool ($28 profit).</p>
+            </div>
+            <div class="result-card place">
+              <h4>If he places (2nd)</h4>
+              <p class="result-amount">$24</p>
+              <p class="result-detail">You take 20% of the $120 place pool ($4 profit).</p>
+            </div>
+            <div class="result-card show">
+              <h4>If he shows (3rd)</h4>
+              <p class="result-amount">$8</p>
+              <p class="result-detail">You take 20% of the $40 show pool (a small loss).</p>
+            </div>
+          </div>
+        </div>
+        <p class="muted small">One bet. Three ways to win something. That's the magic of the 60/30/10.</p>
+      </div>
+
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <p class="footer-title">The Family Derby Pool</p>
+        <p class="muted">Churchill Downs · Louisville, Kentucky · The First Saturday in May</p>
+      </div>
+      <p class="muted small footer-fine">For fun and family. No wagers are accepted by this site. Bet responsibly — the only sure thing is the bourbon.</p>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>

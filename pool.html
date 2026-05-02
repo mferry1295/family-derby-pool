@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Pool · The Family Derby Pool</title>
+  <meta name="description" content="Live status of the family pool — pot total, bets placed, your bet slips." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Source+Sans+3:wght@400;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body data-page="pool">
+  <header class="site-nav">
+    <div class="nav-inner">
+      <a href="index.html" class="brand" aria-label="Family Derby Pool home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 2 L13 9 L20 10 L13 12 L12 22 L11 12 L4 10 L11 9 Z" fill="currentColor"/></svg>
+        </span>
+        <span class="brand-text">
+          <span class="brand-line-1">The Family</span>
+          <span class="brand-line-2">Derby Pool</span>
+        </span>
+      </a>
+      <nav class="primary-nav">
+        <a href="index.html">How It Works</a>
+        <a href="field.html">Place a Bet</a>
+        <a href="pool.html" aria-current="page">The Pool</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <p class="event-strip">152<sup>nd</sup> Run for the Roses · Saturday, May 2, 2026 · Churchill Downs</p>
+
+    <section id="pool" class="pool-section">
+      <div class="pool-inner">
+        <header class="pool-head">
+          <h1>The Pool</h1>
+          <p class="muted small">The pot grows as friends throw in. Your slips are saved on this device.</p>
+        </header>
+
+        <div class="stats-row" id="stats-row">
+          <div class="stat-card"><span class="stat-num" data-stat="pot">$0</span><span class="stat-label">Pot</span></div>
+          <div class="stat-card"><span class="stat-num" data-stat="bets">0</span><span class="stat-label">Bets</span></div>
+          <div class="stat-card"><span class="stat-num" data-stat="bettors">0</span><span class="stat-label">Bettors</span></div>
+          <div class="stat-card"><span class="stat-num" data-stat="favorite">—</span><span class="stat-label">Favorite</span></div>
+        </div>
+
+        <div class="ledger-shell">
+          <div class="ledger-head">
+            <h2>Your Bet Slips</h2>
+            <a href="field.html" class="btn btn-ghost small">Place Another Bet</a>
+          </div>
+          <p class="muted small ledger-empty" id="ledger-empty">No bets placed yet — go pick a horse.</p>
+          <ul class="ledger" id="ledger" hidden></ul>
+          <button type="button" class="btn btn-ghost small" id="clear-ledger" hidden>Clear my slips</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <p class="footer-title">The Family Derby Pool</p>
+        <p class="muted">Churchill Downs · Louisville, Kentucky · The First Saturday in May</p>
+      </div>
+      <p class="muted small footer-fine">For fun and family. No wagers are accepted by this site. Bet responsibly — the only sure thing is the bourbon.</p>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
